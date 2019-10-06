@@ -1,0 +1,114 @@
+---
+title: "Replication of Experiment 2 in Hart et al. (2018, Scientific Reports)"
+author: "Yuxuan Li (liyuxuan@stanford.edu)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+---
+
+<!-- Replication reports should all use this template to standardize reporting across projects.  These reports will be public supplementary materials that accompany the summary report(s) of the aggregate results. -->
+
+## Introduction
+
+### Choice of experiment
+Hart et al. (2018) used a simple planar geometric task to examine why people's intuitive geometric reasoning deviated from deterministic, rule-based Euclidean representations and provided a computational account for such deviation. This is particularly relevant to my own work in which I seek to model the acquisition of geometric intuitions.
+
+### Description of paper
+Across 5 variations of the Triangle Completion Task, Hart et al. (2018) found that the distribution of participants' error in estimating the missing corner of a fragmented triangle was scale-dependent, contrary to a static Euclidean representation. The study then showed that the statistical characteristics of a correlated random walk model captured the simulation-based strategies that might have guided the geometric reasoning process in the Triangle Completion Task.
+
+I aim to replicate the main behavioral findings of Experiment 2 of Hart et al. (2018) (Figure S4 A, B), where the study showed that 1). the error of the vertical mean estimate of the missing vertex of the triangle was biased toward the base and increased linearly with side length, and 2). the y-coordinate standard deviation scaled sub-linearly with the side length.
+
+### Stimuli and procedures
+Participants were recruited via Amazon’s Mechanical Turk. Participants were shown 15 different incomplete isosceles triangles, each for 10 times, in a random order. Participants were assigned randomly into two equal-sized groups. Triangles composed of 3 different base angle sizes (Group 1: 30, 45 and 60 degrees; Group 2: 36, 51, and 66 degrees) and with 5 different base lengths (0.1, 0.25, 0.5, 0.75 and 1). For each triangle, participants were asked to position a dot in the estimated location of the missing vertex. A practice trial preceded the experiment.
+
+### Anticipated challenges
+1. Programming the experiment and ensure browser compatibility.
+2. Resolving the pixel scaling between the two groups as described in the original paper.
+
+### Links
+Project Repo: https://github.com/psych251/hart2018  
+Original Paper: https://github.com/psych251/hart2018/tree/master/original_paper
+
+<!---------------end of introduction -------------------->
+
+## Methods
+
+### Power Analysis
+
+Original effect size, power analysis for samples to achieve 80%, 90%, 95% power to detect that effect size.  Considerations of feasibility for selecting planned sample size.
+
+### Planned Sample
+
+Planned sample size and/or termination rule, sampling frame, known demographics if any, preselection rules if any.
+
+### Materials
+
+All materials - can quote directly from original article - just put the text in quotations and note that this was followed precisely.  Or, quote directly and just point out exceptions to what was described in the original article.
+
+### Procedure	
+
+Can quote directly from original article - just put the text in quotations and note that this was followed precisely.  Or, quote directly and just point out exceptions to what was described in the original article.
+
+### Analysis Plan
+
+Can also quote directly, though it is less often spelled out effectively for an analysis strategy section.  The key is to report an analysis strategy that is as close to the original - data cleaning rules, data exclusion rules, covariates, etc. - as possible.  
+
+**Clarify key analysis of interest here**  You can also pre-specify additional analyses you plan to do.
+
+### Differences from Original Study
+
+Explicitly describe known differences in sample, setting, procedure, and analysis plan from original study.  The goal, of course, is to minimize those differences, but differences will inevitably occur.  Also, note whether such differences are anticipated to make a difference based on claims in the original article or subsequent published research on the conditions for obtaining the effect.
+
+### Methods Addendum (Post Data Collection)
+
+You can comment this section out prior to final report with data collection.
+
+#### Actual Sample
+  Sample size, demographics, data exclusions based on rules spelled out in analysis plan
+
+#### Differences from pre-data collection methods plan
+  Any differences from what was described as the original plan, or “none”.
+
+
+## Results
+
+
+### Data preparation
+
+Data preparation following the analysis plan.
+	
+```{r include=F}
+###Data Preparation
+
+####Load Relevant Libraries and Functions
+
+####Import data
+
+#### Data exclusion / filtering
+
+#### Prepare data for analysis - create columns etc.
+```
+
+### Confirmatory analysis
+
+The analyses as specified in the analysis plan.  
+
+*Side-by-side graph with original graph is ideal here*
+
+### Exploratory analyses
+
+Any follow-up analyses desired (not required).  
+
+## Discussion
+
+### Summary of Replication Attempt
+
+Open the discussion section with a paragraph summarizing the primary result from the confirmatory analysis and the assessment of whether it replicated, partially replicated, or failed to replicate the original result.  
+
+### Commentary
+
+Add open-ended commentary (if any) reflecting (a) insights from follow-up exploratory analysis, (b) assessment of the meaning of the replication (or not) - e.g., for a failure to replicate, are the differences between original and present study ones that definitely, plausibly, or are unlikely to have been moderators of the result, and (c) discussion of any objections or challenges raised by the current and original authors about the replication attempt.  None of these need to be long.
