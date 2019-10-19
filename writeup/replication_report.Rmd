@@ -43,25 +43,51 @@ Original effect size, power analysis for samples to achieve 80%, 90%, 95% power 
 
 ### Planned Sample
 
-Planned sample size and/or termination rule, sampling frame, known demographics if any, preselection rules if any.
+Following the original paper, we will recruit N=100 educated US adults from MTurk for this experiment.
 
 ### Materials
+Materials as quoted from the original paper:
 
-All materials - can quote directly from original article - just put the text in quotations and note that this was followed precisely.  Or, quote directly and just point out exceptions to what was described in the original article.
+"All participants were shown 15 (fragmented isosceles) triangles, at base lengths of 0.1, 0.25, 0.5, 0.75, 1 of the maximum base length (which was 900 pixels for group 1 and 1300 pixels for group 2). Each base length presented 3 different angle sizes (30, 45 and 60 degrees for group 1 and 36, 51 and 66 degrees for group 2)...group 1 saw a y-coordinate length scale of 900 pixels and group 2 saw a y-coordinate length scale of 1300 pixels."
+
+The stimuli used in this replication project will follow the materials quoted above.
 
 ### Procedure	
+The task procedure used in this replication project will precisely follow the description in the original paper:
 
-Can quote directly from original article - just put the text in quotations and note that this was followed precisely.  Or, quote directly and just point out exceptions to what was described in the original article.
+"... we showed participants 15 different incomplete isosceles triangles 10 times in a random order (for a total of 150 triangles for each participant)...For each triangle, we asked participants to position a dot in the estimated location of the missing vertex. Before the experiment began, participants had one practice trial, in which the location of the missing vertex was indicated by a dot of a different color, and they were asked to position their dot on the indicated position."
 
 ### Analysis Plan
 
-Can also quote directly, though it is less often spelled out effectively for an analysis strategy section.  The key is to report an analysis strategy that is as close to the original - data cleaning rules, data exclusion rules, covariates, etc. - as possible.  
+I plan to use the nls() function in R to perform nonlinear regression.
 
-**Clarify key analysis of interest here**  You can also pre-specify additional analyses you plan to do.
+**Main variables of interest**  
+δ, the mean estimated y-coordinate deviation from the true y-coordinate location of the missing vertex  
+σ, the standard deviation of participants' distribution of responses  
+L, triangle side length  
+
+**Key analyses of interest**  
+1. δ biases towards the base (no statistical test)  
+2. δ ~ L<sup>x1</sup>, δ increases linearly with L (x1 close to 1)  
+3. σ ~ L<sup>x2</sup>, σ scales sub-linearly with L (x2 < 1)  
+
+Additional data analysis steps from the paper:
+"To match the scales for the two groups, we divided the estimates of the second group by a ratio of 13/9... The mean deviation from the true location of the missing vertex... and the standard deviation were calculated for each participant and then averaged across participants.
 
 ### Differences from Original Study
 
-Explicitly describe known differences in sample, setting, procedure, and analysis plan from original study.  The goal, of course, is to minimize those differences, but differences will inevitably occur.  Also, note whether such differences are anticipated to make a difference based on claims in the original article or subsequent published research on the conditions for obtaining the effect.
+**Sample**: Both this replication project and the original study recruit particpants from MTurk, but the specific sample will differ. This should not affect the results.
+
+**Materials and procedure**: Some details of the experimental design might need to be extrapolated, although I am actively contacting the original author for support/clarification. Specifically,
+
+1. The criteria for the targeted participant pool (i.e. educated US adults), for example, having finished high school or college.  
+2. The displayed length of the line segments that form the base angles.
+3. The size of the dot to be moved, relative to the triangles.
+4. The task parameters (i.e., base angle, base length) used in the practice trial.  
+
+These should not affect the results.
+
+**Analysis**: The original paper performed regression using some function in Matlab (Mathematica 11.0), while I plan to use nls() in R. This should not affect the results.
 
 ### Methods Addendum (Post Data Collection)
 
