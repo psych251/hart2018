@@ -1,0 +1,252 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<style>
+
+body {
+    font-family: Arial, Helvetica;
+    font-size: 14pt;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.trialDiv {
+    border: 2px solid gray;
+    padding: 20px;
+    width: 600px;
+    margin: 0 auto;
+    display: none;
+}
+
+.imgDiv {
+    width: 500px;
+    height: 500px;
+    margin: 0 auto;
+}
+
+#instructions {
+    width: 400px;
+    margin: 0 auto;
+    text-align: center;
+    margin-top: 100px;
+}
+
+.startButton {
+    width: 200px;
+    text-align: center;
+    color: black;
+    background-color: white;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    padding: 4px;
+    cursor:pointer;
+    margin: 0 auto;
+}
+
+.startButton:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.continueButton {
+    width: 200px;
+    text-align: center;
+    color: black;
+    background-color: white;
+    border: 2px solid #008CBA;
+    border-radius: 8px;
+    padding: 4px;
+    cursor:pointer;
+    margin: 0 auto;
+}
+
+.continueButton:hover {
+    background-color: #008CBA;
+    color: white;
+}
+
+.dot {
+  height: 10px;
+  width: 10px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
+  position: absolute;
+}
+
+#submitButton {
+    display: none;
+}
+
+</style>
+
+
+<div id="instructions">
+    <p> For each incomplete triangle, please move the dot to the missing corner location.
+        <div id="startPracticeButton" class="startButton">Start Practice</div>
+    </p>
+</div>
+
+<div id="practiceTrial" class="trialDiv">
+    <p> Move dot to the top corner location (marked in light blue). </p>
+    <div id="practiceImage" class="imgDiv">
+        <span id="practiceDot" class="dot"></span>
+        <img src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
+    </div>
+    <div id="startExperimentButton" class="startButton">Finish Practice and Start Experiment</div>
+    <input type="hidden" name="x" value=-1 id="x">
+    <input type="hidden" name="y" value=-1 id="y">
+    <input type="hidden" name="rt" value=-1 id="rt">
+</div>
+
+<div id="trial" class="trialDiv">
+    <p> Move dot to the top corner location. </p>
+    <div id="taskImage" class="imgDiv">
+        <span id="taskDot" class="dot"></span>
+        <img src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
+    </div>
+    <div id="continueButton" class="continueButton">Continue</div>
+    <input type="hidden" name="x" value=-1 id="x">
+    <input type="hidden" name="y" value=-1 id="y">
+    <input type="hidden" name="rt" value=-1 id="rt">
+</div>
+
+<script>
+
+var verbose = true; //for testing purposes, logs things to the console
+var isPractice;
+
+// generate random trial sequence
+var repeat = 1; // each image is shown 10 times, may be changed for testing purposes
+var allTrials = Array(repeat).fill(0).concat(Array(repeat).fill(1),
+                                         Array(repeat).fill(2),
+                                         Array(repeat).fill(3),
+                                         Array(repeat).fill(4),
+                                         Array(repeat).fill(5),
+                                         Array(repeat).fill(6),
+                                         Array(repeat).fill(7),
+                                         Array(repeat).fill(8),
+                                         Array(repeat).fill(9),
+                                         Array(repeat).fill(10),
+                                         Array(repeat).fill(11),
+                                         Array(repeat).fill(12),
+                                         Array(repeat).fill(13),
+                                         Array(repeat).fill(14))
+var trialOrder = shuffle(allTrials);
+var trialIndex;
+var nTrials = 150;
+var startTrialTime;
+var group = (Math.random()<0.5)? 1 : 2 // may change to hard-coded 1 and 2
+if (verbose) {
+    console.log("group="+group);
+    console.log("trial sequence:", trialOrder)
+}
+
+function moveDot(e){
+    if (isPractice){
+        $('#practiceDot').css({
+            left:  e.pageX-5,
+            top:  e.pageY-5
+        });
+    }
+    else {
+        $('#taskDot').css({
+            left:  e.pageX-5,
+            top:  e.pageY-5
+        });
+    }
+    
+}
+
+function dropDot(){
+    //log data
+    var x, y;
+    x = $('#x');
+    y = $('#y');
+    /*
+    if (practice) {
+        x = $('#x' + '_practice');
+        y = $('#y' + '_practice');
+    }
+    else {
+        x = $('#x' + '_' + trialOrder[curTrial]);
+        y = $('#y' + '_' + trialOrder[curTrial]);
+    }
+    */
+    x.val($('#dot').left);
+    y.val($('#dot').top);
+    if (verbose) {
+        console.log(x.val());
+        console.log(y.val());
+    }
+    var curTime = new Date();
+    var rt = curTime - startTrialTime;
+    $('#rt').val(rt);
+    if (verbose) {
+        console.log(rt);
+    }
+    $(document).unbind();
+    if (isPractice) {
+        $("#startExperimentButton").show();
+    }
+    else {
+        $("#continueButton").show();
+    }
+}
+
+function practiceTrial() {
+    startTrialTime = new Date();
+    isPractice = true;
+    $('#instructions').hide();
+    $('#practiceTrial').show();
+    $("#startExperimentButton").hide();
+    $(document).bind('mousemove', moveDot);
+    $('#practiceImage').click(dropDot);
+}
+
+function showTrial(whichImage) {
+    var filename = 'http://web.stanford.edu/~liyuxuan/mturk/group'+group+'/'+whichImage+'.png';
+    console.log(filename);
+    $('#trial').show();
+    $('#taskImage').attr('src', filename);
+    $('#continueButton').hide();
+    $(document).bind('mousemove', moveDot);
+    $('#taskImage').click(dropDot);
+}
+
+function showFirstTrial() {
+    isPractice = false;
+    $('#practiceTrial').hide();
+    trialIndex = 0;
+    startTrialTime = new Date();
+    showTrial(trialOrder[trialIndex]);
+}
+
+function trialIsOver() {
+    $('#trial').hide();
+    trialIndex++;
+    if (trialIndex >= nTrials) {
+        $('#submitButton').show();
+    } else {
+        showTrial(trialOrder[trialIndex]);
+        startTrialTime = new Date();
+    }
+}
+
+/* Fisher-Yates shuffle */
+function shuffle(o){
+    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+}
+
+/* experiment flow */
+$('#startPracticeButton').click(practiceTrial);
+$('#startExperimentButton').click(showFirstTrial);
+$('#continueButton').click(trialIsOver);
+
+</script>
+
+<!-- do not put this on Turk -->
+<input type="submit" id="submitButton">
