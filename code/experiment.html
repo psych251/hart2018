@@ -4,7 +4,7 @@
 
 body {
     font-family: Arial, Helvetica;
-    font-size: 14pt;
+    font-size: 10pt;
 }
 
 img {
@@ -20,22 +20,22 @@ p {
 .trialDiv {
     /* border: 2px solid gray; */
     padding: 0px;
-    width: 650px;
-    height: 650px;
+    width: 500px;
+    height: 500px;
     margin: 0 auto;
     display: none;
 }
 
 .imgDiv {
     /* img size is 1425:2175 (57:87) */
-    width: 399px;
-    height: 609px;
+    width: 285px;
+    height: 435px;
     padding: 0px;
     margin: 0 auto;
 }
 
 #instructions {
-    width: 400;
+    width: 500;
     margin: 0 auto;
     text-align: center;
     margin-top: 100px;
@@ -68,8 +68,8 @@ p {
     border-radius: 8px;
     padding: 0px;
     cursor: pointer;
-    margin-top: -15px;
-    margin-left: 600px;
+    margin-top: -20px;
+    margin-left: 400px;
 }
 
 .continueButton:hover {
@@ -78,12 +78,12 @@ p {
 }
 
 .dot {
-  height: 10px;
-  width: 10px;
-  background-color: red;
-  border-radius: 50%;
-  display: inline-block;
-  position: absolute;
+    height: 10px;
+    width: 10px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+    position: absolute;
 }
 
 #submitButton {
@@ -102,21 +102,20 @@ p {
 
 </style>
 
-
 <div id="instructions">
-    <p> For each incomplete triangle, please move the dot to the missing corner location.
-        <div id="startPracticeButton" class="startButton">Start Practice</div>
-    </p>
+    <p> For each incomplete triangle, move the dot to the missing corner location.</p>
+    <p> Please complete this HIT in one sitting.</p>
+    <div id="startPracticeButton" class="startButton">Start Practice</div>
 </div>
 
 <div id="pracTrial" class="trialDiv">
     <p> Move dot to the top corner location (marked in light blue). </p>
     <p style="color:red;"> You can only click once! </p>
     <div id="pracImage" class="imgDiv">
-        <span id="pracDot" name="pracDot" class="dot"></span>
-        <img id="pracImageSrc" src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
+        <div id="pracDot" name="pracDot" class="dot"></div>
+        <img id="pracImageSrc" src="http://web.stanford.edu/~liyuxuan/mturk/practice.png" alt="Triangle">
     </div>
-    <div id="startExperimentButton" class="startButton" style="margin-left:600px; margin-top:-50;">Finish Practice and Start Experiment</div>
+    <div id="startExperimentButton" class="startButton" style="margin-left:400px; margin-top:-50;">Finish Practice and Start Experiment</div>
     <input type="hidden" name="pracX" id="pracX">
     <input type="hidden" name="pracY" id="pracY">
     <input type="hidden" name="pracRT" id="pracRT">
@@ -125,16 +124,18 @@ p {
 <div id="taskTrial" class="trialDiv">
     <p> Move dot to the top corner location. </p>
     <div id="taskImage" class="imgDiv">
-        <span id="taskDot" name="taskDot" class="dot"></span>
-        <img id="taskImageSrc" src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
+        <div id="taskDot" name="taskDot" class="dot"></div>
+        <img id="taskImageSrc" src="http://web.stanford.edu/~liyuxuan/mturk/practice.png" alt="Triangle">
     </div>
     <div id="continueButton" class="continueButton">Continue</div>
-    <input type="hidden" name="taskX" id="taskX">
-    <input type="hidden" name="taskY" id="taskY">
-    <input type="hidden" name="taskRT" id="taskRT">
-    <input type="hidden" name="trialIndex" id="trialIndex">
-    <input type="hidden" name="trialImg" id="trialImg">
 </div>
+
+<input type="hidden" name="group" id="group">
+<input type="hidden" name="taskX" id="taskX">
+<input type="hidden" name="taskY" id="taskY">
+<input type="hidden" name="taskRT" id="taskRT">
+<input type="hidden" name="trialIndex" id="trialIndex">
+<input type="hidden" name="trialImg" id="trialImg">
 
 <script>
 
@@ -162,6 +163,7 @@ var trialIndex = 0;
 var nTrials = shuffledImages.length;
 var startTrialTime;
 var group = (Math.random()<0.5)? 1 : 2; // may change to hard-coded 1 and 2
+$('#group').val(group);
 if (verbose) {
     console.log("Group: ", group);
     console.log("Image sequence:", shuffledImages);
@@ -279,8 +281,8 @@ function showFirstTrial() {
     isPractice = false;
     $('#pracTrial').hide();
     trialIndex = 0;
-    $('#trialIndex').val($('#trialIndex')+','+trialIndex);
-    $('#trialImg').val($('#trialImg')+','+shuffledImages[trialIndex]);
+    $('#trialIndex').val($('#trialIndex').val()+','+trialIndex);
+    $('#trialImg').val($('#trialImg').val()+','+shuffledImages[trialIndex]);
     if (verbose) {
         console.log('tiralIndex:', trialIndex);
         console.log('tiralImg:', shuffledImages[trialIndex]);
@@ -296,8 +298,8 @@ function trialIsOver() {
         $('#submitButton').show();
     } 
     else {
-        $('#trialIndex').val($('#trialIndex')+','+trialIndex);
-        $('#trialImg').val($('#trialImg')+','+shuffledImages[trialIndex]);
+        $('#trialIndex').val($('#trialIndex').val()+','+trialIndex);
+        $('#trialImg').val($('#trialImg').val()+','+shuffledImages[trialIndex]);
         if (verbose) {
             console.log('tiralIndex:', trialIndex);
             console.log('tiralImg:', shuffledImages[trialIndex]);
