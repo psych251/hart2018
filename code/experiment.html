@@ -87,6 +87,16 @@ p {
 }
 
 #submitButton {
+    width: 200px;
+    text-align: center;
+    color: black;
+    background-color: white;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    padding: 4px;
+    cursor:pointer;
+    margin: 0 auto;
+    margin-top: 6px;
     display: none;
 }
 
@@ -112,11 +122,11 @@ p {
     <input type="hidden" name="pracRT" id="pracRT">
 </div>
 
-<div id="trial" class="trialDiv">
+<div id="taskTrial" class="trialDiv">
     <p> Move dot to the top corner location. </p>
     <div id="taskImage" class="imgDiv">
         <span id="taskDot" name="taskDot" class="dot"></span>
-        <img id="taskImageSrc"  src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
+        <img id="taskImageSrc" src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
     </div>
     <div id="continueButton" class="continueButton">Continue</div>
     <input type="hidden" name="taskX" id="taskX">
@@ -132,8 +142,7 @@ var verbose = false; //for testing purposes, logs things to the console
 var isPractice;
 var imgRoot = 'http://web.stanford.edu/~liyuxuan/mturk/';
 
-// generate random trial sequence
-var repeat = 1; // each image is shown 10 times, may be changed for testing purposes
+var repeat = 10; // each image is shown 10 times, may be changed for testing purposes
 var allImgs = Array(repeat).fill(0).concat(Array(repeat).fill(1),
                                          Array(repeat).fill(2),
                                          Array(repeat).fill(3),
@@ -147,70 +156,97 @@ var allImgs = Array(repeat).fill(0).concat(Array(repeat).fill(1),
                                          Array(repeat).fill(11),
                                          Array(repeat).fill(12),
                                          Array(repeat).fill(13),
-                                         Array(repeat).fill(14))
+                                         Array(repeat).fill(14));
 var shuffledImages = shuffle(allImgs);
-var trialIndex;
-var nTrials = 15 * repeat;
+var trialIndex = 0;
+var nTrials = shuffledImages.length;
 var startTrialTime;
-var group = (Math.random()<0.5)? 1 : 2 // may change to hard-coded 1 and 2
+var group = (Math.random()<0.5)? 1 : 2; // may change to hard-coded 1 and 2
 if (verbose) {
-    console.log("group="+group);
-    console.log("image sequence:", shuffledImages)
+    console.log("Group: ", group);
+    console.log("Image sequence:", shuffledImages);
 }
 
 function moveDot(e){
-    if (isPractice){
+    var left, top;
+    left = e.pageX - 5;
+    top = e.pageY - 5;
+
+    // if mouse position is outside of the parent trial div, freeze dot at boundary
+    if (isPractice){ //practice trials
+        if (left < $('#pracTrial').offset().left){
+            left = $('#pracTrial').offset().left;
+        }
+        else if (left > $('#pracTrial').offset().left + $('#pracTrial').width()){
+            left = $('#pracTrial').offset().left + $('#pracTrial').width();
+        }
+        if (top < $('#pracTrial').offset().top + 44){ //skip the instructions
+            top = $('#pracTrial').offset().top + 44;
+        }
+        else if (top > $('#pracTrial').offset().top + $('#pracTrial').height()){
+            top = $('#pracTrial').offset().top + $('#pracTrial').height();
+        }
         $('#pracDot').css({
-            left:  e.pageX-5,
-            top:  e.pageY-5
+            left: left,
+            top: top
         });
     }
-    else {
+    else { //task trials
+        if (left < $('#taskTrial').offset().left){
+            left = $('#taskTrial').offset().left;
+        }
+        else if (left > $('#taskTrial').offset().left + $('#taskTrial').width()){
+            left = $('#taskTrial').offset().left + $('#taskTrial').width();
+        }
+        if (top < $('#taskTrial').offset().top + 22){ //skips the instructions
+            top = $('#taskTrial').offset().top + 22;
+        }
+        else if (top > $('#taskTrial').offset().top + $('#taskTrial').height()){
+            top = $('#taskTrial').offset().top + $('#taskTrial').height();
+        }
         $('#taskDot').css({
-            left:  e.pageX-5,
-            top:  e.pageY-5
+            left: left,
+            top: top
         });
     }
 }
 
 function dropDot() {
 
+    /* record data:
+       - account for the radius (5px) of the dot and record the x-y coordinates of the center of the dot,
+         relative to the image boundaries (x-axis starts from left, y-axis starts from top)
+       - the starting position of the dot is (5,5) relative to image
+       - image dimension is 399px by 609px
+    */
     var curTime = new Date();
     var trialRT = curTime - startTrialTime;
-    // console.log(trialRT);
-
-    // record data
-    // account for the width/height (10px) of the dot, 
-    // and record the x-y coordinates of the dot as the center of the dot
-    // relative to the image boundaries (x-axis starts from left, y-axis starts from top)
-    // note: the starting position of the dot it (5,5) relative to image because the radius of the dot is 5px
-    // note: image dimension is 500px by 500px
     var x, y;
     if (isPractice) {
-        x = ($('#pracDot').position().left+$('#pracDot').width()/2) - $('#pracImageSrc').position().left;
-        y = ($('#pracDot').position().top+$('#pracDot').height()/2) - $('#pracImageSrc').position().top;
+        x = ($('#pracDot').position().left + $('#pracDot').width()/2) - $('#pracImageSrc').position().left;
+        y = ($('#pracDot').position().top + $('#pracDot').height()/2) - $('#pracImageSrc').position().top;
         $('#pracX').val(x);
         $('#pracY').val(y);
         $('#pracRT').val(trialRT);
         if (verbose) {
-            console.log('pracX', $('#pracX').val());
-            console.log('pracY', $('#pracY').val());
-            console.log('pracRT', $('#pracRT').val());
+            console.log('pracX:', $('#pracX').val());
+            console.log('pracY:', $('#pracY').val());
+            console.log('pracRT:', $('#pracRT').val());
         }
     }
     else {
-        x = ($('#taskDot').position().left+$('#taskDot').width()/2) - $('#taskImageSrc').position().left;
-        y = ($('#taskDot').position().top+$('#taskDot').height()/2) - $('#taskImageSrc').position().top;
-        $('#taskX').val($('#taskX').val()+','+x);
+        x = ($('#taskDot').position().left + $('#taskDot').width()/2) - $('#taskImageSrc').position().left;
+        y = ($('#taskDot').position().top + $('#taskDot').height()/2) - $('#taskImageSrc').position().top;
+        $('#taskX').val($('#taskX').val()+','+x); //hacky way of storing multi-trial data
         $('#taskY').val($('#taskY').val()+','+y);
         $('#taskRT').val($('#taskRT').val()+','+trialRT);
         if (verbose) {
-            console.log('taskX', $('#taskX').val());
-            console.log('taskY', $('#taskY').val());
-            console.log('taskRT', $('#taskRT').val());
+            console.log('taskX:', $('#taskX').val());
+            console.log('taskY:', $('#taskY').val());
+            console.log('taskRT:', $('#taskRT').val());
         }
     }
-    $(document).unbind();
+    $(document).unbind(); //disable dot moving with mouse
     if (isPractice) {
         $("#startExperimentButton").show();
     }
@@ -231,10 +267,10 @@ function practiceTrial() {
 function showTrial(whichImage) {
     var filename = imgRoot+'group'+group+'_'+whichImage+'.png';
     $('#taskImageSrc').attr('src', filename); // swap in the image for this trial
-    $('#taskDot').css('position','absolute'); // reset dot position
-    $('#taskDot').css('left',420);
-    $('#taskDot').css('top',50);
-    $('#trial').show();
+    $('#taskDot').css('position', 'absolute'); // reset dot position
+    $('#taskDot').css('left', 420);
+    $('#taskDot').css('top', 50);
+    $('#taskTrial').show();
     $('#continueButton').hide();
     $(document).bind('mousemove', moveDot);
 }
@@ -243,27 +279,28 @@ function showFirstTrial() {
     isPractice = false;
     $('#pracTrial').hide();
     trialIndex = 0;
-    startTrialTime = new Date();
     $('#trialIndex').val($('#trialIndex')+','+trialIndex);
     $('#trialImg').val($('#trialImg')+','+shuffledImages[trialIndex]);
     if (verbose) {
-        // console.log('tiral index: ', trialIndex);
-        // console.log('tiral img: ', shuffledImages[trialIndex]);
+        console.log('tiralIndex:', trialIndex);
+        console.log('tiralImg:', shuffledImages[trialIndex]);
     }
     showTrial(shuffledImages[trialIndex]);
+    startTrialTime = new Date();
 }
 
 function trialIsOver() {
-    $("#trial").hide();
+    $("#taskTrial").hide();
     trialIndex++;
     if (trialIndex >= nTrials) {
         $('#submitButton').show();
-    } else {
+    } 
+    else {
         $('#trialIndex').val($('#trialIndex')+','+trialIndex);
         $('#trialImg').val($('#trialImg')+','+shuffledImages[trialIndex]);
         if (verbose) {
-            // console.log('tiral index: ', trialIndex);
-            // console.log('tiral img: ', shuffledImages[trialIndex]);
+            console.log('tiralIndex:', trialIndex);
+            console.log('tiralImg:', shuffledImages[trialIndex]);
         }
         showTrial(shuffledImages[trialIndex]);
         startTrialTime = new Date();
