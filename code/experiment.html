@@ -12,22 +12,30 @@ img {
     max-height: 100%;
 }
 
+p {
+    margin: 0 auto;
+    padding: 0;
+}
+
 .trialDiv {
-    border: 2px solid gray;
-    padding: 20px;
-    width: 600px;
+    /* border: 2px solid gray; */
+    padding: 0px;
+    width: 650px;
+    height: 650px;
     margin: 0 auto;
     display: none;
 }
 
 .imgDiv {
-    width: 500px;
-    height: 500px;
+    /* img size is 1425:2175 (57:87) */
+    width: 399px;
+    height: 609px;
+    padding: 0px;
     margin: 0 auto;
 }
 
 #instructions {
-    width: 400px;
+    width: 400;
     margin: 0 auto;
     text-align: center;
     margin-top: 100px;
@@ -43,7 +51,7 @@ img {
     padding: 4px;
     cursor:pointer;
     margin: 0 auto;
-    margin-top: 15px;
+    margin-top: 6px;
 }
 
 .startButton:hover {
@@ -52,16 +60,16 @@ img {
 }
 
 .continueButton {
-    width: 200px;
+    width: 150px;
     text-align: center;
     color: black;
     background-color: white;
     border: 2px solid #008CBA;
     border-radius: 8px;
-    padding: 4px;
+    padding: 0px;
     cursor: pointer;
-    margin-top: 15px;
-    margin-left: 400px;
+    margin-top: -15px;
+    margin-left: 600px;
 }
 
 .continueButton:hover {
@@ -91,38 +99,42 @@ img {
     </p>
 </div>
 
-<div id="practiceTrial" class="trialDiv">
+<div id="pracTrial" class="trialDiv">
     <p> Move dot to the top corner location (marked in light blue). </p>
-    <div id="practiceImage" class="imgDiv">
-        <span id="practiceDot" class="dot"></span>
-        <img src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
+    <p style="color:red;"> You can only click once! </p>
+    <div id="pracImage" class="imgDiv">
+        <span id="pracDot" name="pracDot" class="dot"></span>
+        <img id="pracImageSrc" src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
     </div>
-    <div id="startExperimentButton" class="startButton">Finish Practice and Start Experiment</div>
-    <input type="hidden" name="x" value=-1 id="x">
-    <input type="hidden" name="y" value=-1 id="y">
-    <input type="hidden" name="rt" value=-1 id="rt">
+    <div id="startExperimentButton" class="startButton" style="margin-left:600px; margin-top:-50;">Finish Practice and Start Experiment</div>
+    <input type="hidden" name="pracX" id="pracX">
+    <input type="hidden" name="pracY" id="pracY">
+    <input type="hidden" name="pracRT" id="pracRT">
 </div>
 
 <div id="trial" class="trialDiv">
     <p> Move dot to the top corner location. </p>
     <div id="taskImage" class="imgDiv">
-        <span id="taskDot" class="dot"></span>
-        <img src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
+        <span id="taskDot" name="taskDot" class="dot"></span>
+        <img id="taskImageSrc"  src="http://web.stanford.edu/~liyuxuan/mturk/practice.png">
     </div>
     <div id="continueButton" class="continueButton">Continue</div>
-    <input type="hidden" name="x" value=-1 id="x">
-    <input type="hidden" name="y" value=-1 id="y">
-    <input type="hidden" name="rt" value=-1 id="rt">
+    <input type="hidden" name="taskX" id="taskX">
+    <input type="hidden" name="taskY" id="taskY">
+    <input type="hidden" name="taskRT" id="taskRT">
+    <input type="hidden" name="trialIndex" id="trialIndex">
+    <input type="hidden" name="trialImg" id="trialImg">
 </div>
 
 <script>
 
-var verbose = true; //for testing purposes, logs things to the console
+var verbose = false; //for testing purposes, logs things to the console
 var isPractice;
+var imgRoot = 'http://web.stanford.edu/~liyuxuan/mturk/';
 
 // generate random trial sequence
 var repeat = 1; // each image is shown 10 times, may be changed for testing purposes
-var allTrials = Array(repeat).fill(0).concat(Array(repeat).fill(1),
+var allImgs = Array(repeat).fill(0).concat(Array(repeat).fill(1),
                                          Array(repeat).fill(2),
                                          Array(repeat).fill(3),
                                          Array(repeat).fill(4),
@@ -136,19 +148,19 @@ var allTrials = Array(repeat).fill(0).concat(Array(repeat).fill(1),
                                          Array(repeat).fill(12),
                                          Array(repeat).fill(13),
                                          Array(repeat).fill(14))
-var trialOrder = shuffle(allTrials);
+var shuffledImages = shuffle(allImgs);
 var trialIndex;
-var nTrials = 150;
+var nTrials = 15 * repeat;
 var startTrialTime;
 var group = (Math.random()<0.5)? 1 : 2 // may change to hard-coded 1 and 2
 if (verbose) {
     console.log("group="+group);
-    console.log("trial sequence:", trialOrder)
+    console.log("image sequence:", shuffledImages)
 }
 
 function moveDot(e){
     if (isPractice){
-        $('#practiceDot').css({
+        $('#pracDot').css({
             left:  e.pageX-5,
             top:  e.pageY-5
         });
@@ -159,35 +171,43 @@ function moveDot(e){
             top:  e.pageY-5
         });
     }
-    
 }
 
-function dropDot(){
-    //log data
+function dropDot() {
+    var curTime = new Date();
+    var trialRT = curTime - startTrialTime;
+    // console.log(trialRT);
+
+    // record data
+    // account for the width/height (10px) of the dot, 
+    // and record the x-y coordinates of the dot as the center of the dot
+    // relative to the image boundaries (x-axis starts from left, y-axis starts from top)
+    // note: the starting position of the dot it (5,5) relative to image because the radius of the dot is 5px
+    // note: image dimension is 500px by 500px
     var x, y;
-    x = $('#x');
-    y = $('#y');
-    /*
-    if (practice) {
-        x = $('#x' + '_practice');
-        y = $('#y' + '_practice');
+    if (isPractice) {
+        x = ($('#pracDot').position().left+$('#pracDot').width()/2) - $('#pracImageSrc').position().left;
+        y = ($('#pracDot').position().top+$('#pracDot').height()/2) - $('#pracImageSrc').position().top;
+        $('#pracX').val(x);
+        $('#pracY').val(y);
+        $('#pracRT').val(trialRT);
+        if (verbose) {
+            console.log('pracX', $('#pracX').val());
+            console.log('pracY', $('#pracY').val());
+            console.log('pracRT', $('#pracRT').val());
+        }
     }
     else {
-        x = $('#x' + '_' + trialOrder[curTrial]);
-        y = $('#y' + '_' + trialOrder[curTrial]);
-    }
-    */
-    x.val($('#dot').left);
-    y.val($('#dot').top);
-    if (verbose) {
-        console.log(x.val());
-        console.log(y.val());
-    }
-    var curTime = new Date();
-    var rt = curTime - startTrialTime;
-    $('#rt').val(rt);
-    if (verbose) {
-        console.log(rt);
+        x = ($('#taskDot').position().left+$('#taskDot').width()/2) - $('#taskImageSrc').position().left;
+        y = ($('#taskDot').position().top+$('#taskDot').height()/2) - $('#taskImageSrc').position().top;
+        $('#taskX').val($('#taskX').val()+','+x);
+        $('#taskY').val($('#taskY').val()+','+y);
+        $('#taskRT').val($('#taskRT').val()+','+trialRT);
+        if (verbose) {
+            console.log('taskX', $('#taskX').val());
+            console.log('taskY', $('#taskY').val());
+            console.log('taskRT', $('#taskRT').val());
+        }
     }
     $(document).unbind();
     if (isPractice) {
@@ -202,37 +222,46 @@ function practiceTrial() {
     startTrialTime = new Date();
     isPractice = true;
     $('#instructions').hide();
-    $('#practiceTrial').show();
+    $('#pracTrial').show();
     $("#startExperimentButton").hide();
     $(document).bind('mousemove', moveDot);
-    $('#practiceDot').click(dropDot);
 }
 
 function showTrial(whichImage) {
-    var filename = 'http://web.stanford.edu/~liyuxuan/mturk/group'+group+'/'+whichImage+'.png';
-    console.log(filename);
+    var filename = imgRoot+'group'+group+'_'+whichImage+'.png';
+    $('#taskImageSrc').attr('src', filename);
     $('#trial').show();
-    $('#taskImage').attr('src', filename);
     $('#continueButton').hide();
     $(document).bind('mousemove', moveDot);
-    $('#taskDot').click(dropDot);
 }
 
 function showFirstTrial() {
     isPractice = false;
-    $('#practiceTrial').hide();
+    $('#pracTrial').hide();
     trialIndex = 0;
     startTrialTime = new Date();
-    showTrial(trialOrder[trialIndex]);
+    $('#trialIndex').val($('#trialIndex')+','+trialIndex);
+    $('#trialImg').val($('#trialImg')+','+shuffledImages[trialIndex]);
+    if (verbose) {
+        // console.log('tiral index: ', trialIndex);
+        // console.log('tiral img: ', shuffledImages[trialIndex]);
+    }
+    showTrial(shuffledImages[trialIndex]);
 }
 
 function trialIsOver() {
-    $('#trial').hide();
+    $("#trial").hide();
     trialIndex++;
     if (trialIndex >= nTrials) {
         $('#submitButton').show();
     } else {
-        showTrial(trialOrder[trialIndex]);
+        $('#trialIndex').val($('#trialIndex')+','+trialIndex);
+        $('#trialImg').val($('#trialImg')+','+shuffledImages[trialIndex]);
+        if (verbose) {
+            // console.log('tiral index: ', trialIndex);
+            // console.log('tiral img: ', shuffledImages[trialIndex]);
+        }
+        showTrial(shuffledImages[trialIndex]);
         startTrialTime = new Date();
     }
 }
@@ -247,6 +276,8 @@ function shuffle(o){
 $('#startPracticeButton').click(practiceTrial);
 $('#startExperimentButton').click(showFirstTrial);
 $('#continueButton').click(trialIsOver);
+$('#pracDot').click(dropDot);
+$('#taskDot').click(dropDot);
 
 </script>
 
