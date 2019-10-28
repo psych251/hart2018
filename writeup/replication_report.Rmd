@@ -31,13 +31,14 @@ Participants were recruited via Amazon’s Mechanical Turk. Participants were sh
 
 ### Links
 Project Repo: https://github.com/psych251/hart2018  
-Original Paper: https://github.com/psych251/hart2018/tree/master/original_paper
+Original Paper: https://github.com/psych251/hart2018/tree/master/original_paper  
+Experiment Implementation: http://web.stanford.edu/~liyuxuan/mturk/experiment.html
 
 <!---------------end of introduction -------------------->
 
 ## Methods
 
-### Power Analysis
+### Power Analysis (#TODO)
 
 Original effect size, power analysis for samples to achieve 80%, 90%, 95% power to detect that effect size.  Considerations of feasibility for selecting planned sample size.
 
@@ -50,7 +51,7 @@ Materials as quoted from the original paper:
 
 "All participants were shown 15 (fragmented isosceles) triangles, at base lengths of 0.1, 0.25, 0.5, 0.75, 1 of the maximum base length (which was 900 pixels for group 1 and 1300 pixels for group 2). Each base length presented 3 different angle sizes (30, 45 and 60 degrees for group 1 and 36, 51 and 66 degrees for group 2)...group 1 saw a y-coordinate length scale of 900 pixels and group 2 saw a y-coordinate length scale of 1300 pixels."
 
-The stimuli used in this replication project will follow the materials quoted above.
+The stimuli used in this replication project will follow the materials quoted above, except the images will be 2175px by 1425px, and both groups will see the same y-coordinate length.
 
 ### Procedure	
 The task procedure used in this replication project will precisely follow the description in the original paper:
@@ -59,7 +60,7 @@ The task procedure used in this replication project will precisely follow the de
 
 ### Analysis Plan
 
-I plan to use the nls() function in R to perform nonlinear regression.
+I plan to use python for data-cleaning, pre-processing, and plotting, and use the nls() function in R to perform nonlinear regression.
 
 **Main variables of interest**  
 δ, the mean estimated y-coordinate deviation from the true y-coordinate location of the missing vertex  
@@ -71,8 +72,8 @@ L, triangle side length
 2. δ ~ L<sup>x1</sup>, δ increases linearly with L (x1 close to 1)  
 3. σ ~ L<sup>x2</sup>, σ scales sub-linearly with L (x2 < 1)  
 
-Additional data analysis steps from the paper:
-"To match the scales for the two groups, we divided the estimates of the second group by a ratio of 13/9... The mean deviation from the true location of the missing vertex... and the standard deviation were calculated for each participant and then averaged across participants.
+Additional data analysis steps from the paper that will be followed:
+"The mean deviation from the true location of the missing vertex... and the standard deviation were calculated for each participant and then averaged across participants."
 
 ### Differences from Original Study
 
@@ -87,7 +88,9 @@ Additional data analysis steps from the paper:
 
 These should not affect the results.
 
-**Analysis**: The original paper performed regression using some function in Matlab (Mathematica 11.0), while I plan to use nls() in R. This should not affect the results.
+**Analysis**: 
+1. A particular data analysis step from the paper will not be applicable: "To match the scales for the two groups, we divided the estimates of the second group by a ratio of 13/9."  
+2. The original paper performed regression using some function in Mathematica 11.0, while I plan to use nls() in R. This should not affect the results.
 
 ### Methods Addendum (Post Data Collection)
 
@@ -105,25 +108,22 @@ You can comment this section out prior to final report with data collection.
 
 ### Data preparation
 
-Data preparation following the analysis plan.
-	
-```{r include=F}
-###Data Preparation
-
-####Load Relevant Libraries and Functions
-
-####Import data
-
-#### Data exclusion / filtering
-
-#### Prepare data for analysis - create columns etc.
-```
+Data preparation is performed using python in a Jupyter notebook.  
+Code can be found in the project git repo: https://github.com/psych251/hart2018/tree/master/code/preprocess.ipynb
 
 ### Confirmatory analysis
 
-The analyses as specified in the analysis plan.  
+In a sandbox mock run with 30 trials, I intentionally clicked on the left vertex for each trial. The plot below shows that the "estimated" left vertex locations is nicely aligned with the true left vertex locations (x-axis jittered).  
+![Alt SanityCheck1](../code/plot/sanity_check.png){width=65%}
 
-*Side-by-side graph with original graph is ideal here*
+I completed a second sandbox mock run with the full 150 trials. The plot below shows the comparison of the main two analyses between this test data and the original paper's.
+
+Sandbox test data:  
+![Alt SanityCheck1](../code/plot/sanity_check2.png){width=80%}  
+
+Original paper (Figure S4, mturk study, N=100):  
+![Alt SanityCheck1](../code/plot/comparison.png){width=80%}  
+
 
 ### Exploratory analyses
 
