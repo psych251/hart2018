@@ -119,10 +119,10 @@ In a sandbox mock run with 30 trials, I intentionally clicked on the left vertex
 I completed a second sandbox mock run with the full 150 trials. The plot below shows the comparison of the main two analyses between this test data and the original paper's.
 
 Sandbox test data:  
-![Alt SanityCheck1](../code/plot/sanity_check2.png){width=80%}  
+![Alt SanityCheck2](../code/plot/sanity_check2.png){width=80%}  
 
 Original paper (Figure S4, mturk study, N=100):  
-![Alt SanityCheck1](../code/plot/comparison.png){width=80%}  
+![Alt PaperFigureS4](../code/plot/comparison.png){width=80%}  
 
 
 ### Exploratory analyses
