@@ -106,7 +106,7 @@ to achieve 95% power, we need N = 23.
 
 ### Planned Sample
 
-The full task takes about 8 minutes (6m42s minutes when I tried + allowing buffer time for consent process and/or slower responses) to complete. Therefore, in order to be consistent with California minimum wage ($7.25/hour), each participant should get paid $0.97. We will recruit N = 30 participants.
+The full task takes about 9 minutes (7 minutes when I tried + allowing buffer time for consent process and/or slower responses) to complete. Therefore, in order to be consistent with California minimum wage ($7.25/hour), each participant should get paid $1.09. We will recruit N = 30 participants.
 
 ### Differences from Original Study
 
