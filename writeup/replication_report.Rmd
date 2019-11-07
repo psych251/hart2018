@@ -38,14 +38,6 @@ Experiment Implementation: http://web.stanford.edu/~liyuxuan/mturk/experiment.ht
 
 ## Methods
 
-### Power Analysis (#TODO)
-
-Original effect size, power analysis for samples to achieve 80%, 90%, 95% power to detect that effect size.  Considerations of feasibility for selecting planned sample size.
-
-### Planned Sample
-
-Following the original paper, we will recruit N=100 educated US adults from MTurk for this experiment.
-
 ### Materials
 Materials as quoted from the original paper:
 
@@ -72,8 +64,49 @@ L, triangle side length
 2. δ ~ L<sup>x1</sup>, δ increases linearly with L (x1 close to 1)  
 3. σ ~ L<sup>x2</sup>, σ scales sub-linearly with L (x2 < 1)  
 
+In addition, I will use a one-sample t-test to as the statistical test for the sublinearity of the scaling exponent.
+
 Additional data analysis steps from the paper that will be followed:
 "The mean deviation from the true location of the missing vertex... and the standard deviation were calculated for each participant and then averaged across participants."
+
+### Power Analysis
+
+I performed the analysis pipeline on the open-access data from the original paper to find out the standard deviation of the key analysis variable, σ, as well as to perform the planned t-test in the replication analysis pipeline. Although the mean scaling exponent from this reproduction attempt did not align with the original one (reproduced: 0.79, original: 0.65), the effect was in the correct direction and significant.
+
+```{r}
+library(tidyverse)
+library(minpack.lm)
+
+# data pre-processed using Python ()
+data = read.csv('~/github/hart2018/data/original_exp2data.csv')
+
+data = data %>%
+  group_by(SubjectID, L) %>%
+  summarize(EstYstd = sd(EstYAdjusted))
+
+subjects = unique(data$SubjectID)
+
+bs = numeric()
+for (s in subjects) {
+  x = data[data$SubjectID==s,]
+  fit = nlsLM(L ~ a*EstYstd^b, data=x, start=list(a=1, b=1))
+  bs <- c(bs, coef(fit)['b'])
+}
+
+mean(bs)
+sd(bs)
+(1-mean(bs))/sd(bs)
+t.test(bs, mu=1)
+```
+
+This analysis revealed that the effect size of the sublinearity of the scaling exponent is 0.79 (Cohen's d). Power analysis revealed that we need the following sample size to detect this effect size:
+to achieve 80% power, we need N = 15;
+to achieve 90% power, we need N = 19;
+to achieve 95% power, we need N = 23.
+
+### Planned Sample
+
+The full task takes about 8 minutes (6m42s minutes when I tried + allowing buffer time for consent process and/or slower responses) to complete. Therefore, in order to be consistent with California minimum wage ($7.25/hour), each participant should get paid $0.97. We will recruit N = 30 participants.
 
 ### Differences from Original Study
 
