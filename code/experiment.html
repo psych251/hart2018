@@ -35,10 +35,18 @@ p {
 }
 
 #instructions {
+    width: 600;
+    margin: 0 auto;
+    text-align: center;
+    margin-top: 100px;
+}
+
+#debrief {
     width: 500;
     margin: 0 auto;
     text-align: center;
     margin-top: 100px;
+    display: none;
 }
 
 .startButton {
@@ -94,18 +102,20 @@ p {
     border: 2px solid #4CAF50;
     border-radius: 8px;
     padding: 4px;
-    cursor:pointer;
+    cursor: pointer;
     margin: 0 auto;
     margin-top: 6px;
+    margin-left: 300px;
     display: none;
 }
 
 </style>
 
 <div id="instructions">
-    <p> For each incomplete triangle, move the dot to the missing corner location.</p>
-    <p> Please complete this HIT in one sitting.</p>
+    <p align='left'> For each incomplete triangle, <b>click</b> to position the dot to the missing top corner location.</p>
+    <p align='left'> This HIT takes <b>less than 10 minutes</b>. Please complete in one sitting.</p>
     <div id="startPracticeButton" class="startButton">Start Practice</div>
+    <p align='left'>By answering the following questions, you are participating in a study being performed by cognitive scientists in the Stanford Department of Psychology. If you have questions about this research, please contact us at <a href="mailto:stanfordpsych251@gmail.com"> stanfordpsych251@gmail.com</a>. You must be at least 18 years old to participate. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal information about you. We have recently been made aware that your public Amazon.com profile can be accessed via your worker ID if you do not choose to opt out. If you would like to opt out of this feature, you may follow instructions available <a href="http://www.amazon.com/gp/help/customer/display.html?nodeId=16465241">here</a>.</p>
 </div>
 
 <div id="pracTrial" class="trialDiv">
@@ -128,6 +138,10 @@ p {
         <img id="taskImageSrc" src="http://web.stanford.edu/~liyuxuan/mturk/practice.png" alt="Triangle">
     </div>
     <div id="continueButton" class="continueButton">Continue</div>
+</div>
+
+<div id="debrief">
+    <p align='left'>Thank you for completing this HIT! We're interested in gaining an understanding of people's intuitive geometric reasoning through this triangle completion task. We would appreciate if you would kindly refrain from sharing information about this HIT with other potential participants.</p>
 </div>
 
 <input type="hidden" name="group" id="group">
@@ -162,12 +176,23 @@ var shuffledImages = shuffle(allImgs);
 var trialIndex = 0;
 var nTrials = shuffledImages.length;
 var startTrialTime;
-var group = (Math.random()<0.5)? 1 : 2; // may change to hard-coded 1 and 2
+var group = 1; // may change to hard-coded 1 and 2
 $('#group').val(group);
 if (verbose) {
     console.log("Group: ", group);
     console.log("Image sequence:", shuffledImages);
 }
+
+// preload images (a total of 15)
+var cachedImages = new Array()
+function preload(group) {
+    for (i = 0; i < 15; i++) {
+        whichImage = shuffledImages[i]
+        cachedImages[i] = new Image();
+        cachedImages[i].src = imgRoot+'group'+group+'_'+whichImage+'.png';
+    }
+}
+preload(group);
 
 function moveDot(e){
     var left, top;
@@ -219,7 +244,7 @@ function dropDot() {
        - account for the radius (5px) of the dot and record the x-y coordinates of the center of the dot,
          relative to the image boundaries (x-axis starts from left, y-axis starts from top)
        - the starting position of the dot is (5,5) relative to image
-       - image dimension is 399px by 609px
+       - image dimension is 285px by 435px;
     */
     var curTime = new Date();
     var trialRT = curTime - startTrialTime;
@@ -295,6 +320,7 @@ function trialIsOver() {
     $("#taskTrial").hide();
     trialIndex++;
     if (trialIndex >= nTrials) {
+        $('#debrief').show();
         $('#submitButton').show();
     } 
     else {
