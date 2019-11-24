@@ -171,18 +171,62 @@ Original paper (Figure S4, mturk study, N=100):
 library(tidyverse)
 library(minpack.lm)
 
-# data is preprocessed using iPython Jupyter Notebook
-data = read.csv('../data/batch3_postprocess.csv')
-
-# exclusion
+# raw mturk data is preprocessed using iPython Jupyter Notebook
+# preprocessing steps include: 
+#   extracting relevant columns
+#   organizing into tidy form
+#   add triangle parameters for each trial
+# Link: https://github.com/psych251/hart2018/tree/master/code/preprocess.ipynb
+data = read.csv('../data/pilotb_postprocess.csv')
 data  = data %>%
-  mutate(deltaY=scaledY-topY) %>%
-  filter(trial!='practice')
-  # ...TODO...
+  mutate(deltaY=scaledY-topY) %>% # create a column for y-axis estimate deviation
+  filter(trial!='practice') # exclude practice trials
+
+exclude_subject= function(s) {
+  x = data[data$subject==s, ]
+  # exclusion 1. Participants who failed to complete all 150 trials will be excluded.
+  if (nrow(x)!= 150) { return(TRUE) }
+  if (sum(is.na(x$estY))>0) { return(TRUE) }
+  # exclusion 2. Participants whose y-axis estimate fell below the triangle base (y=0) for more than 20% of the trials will be excluded.
+  if ((sum(x$estY<0)/length(x$estY)) > 0.2) { return(TRUE) }
+  # exclusion 3. Participants whose x-axis estimate fell to the left of the x-coordinate of the left vertex or to the right of the x-coordinate of the right vertex for more than 20% of the trials will be excluded.
+  left = sum(x$scaledX < x$leftX)
+  right = sum(x$scaledX > x$rightX)
+  if ((left + right)/length(x$scaledX) > 0.2) { return(TRUE) }
+  return(FALSE)
+}
+
+subjects = unique(data$subject)
+exclude = numeric()
+for (s in subjects) {
+  if (exclude_subject(s)) {exclude=c(exclude, s)}
+}
+data = data %>% filter(! subject %in% exclude)
+```
+
+Non-linear regression: side length ~ y-axis deviation (throws an error, needs to be fixed)
+```{r eval=FALSE}
+delta = data %>%
+  group_by(subject, sideLen) %>%
+  summarize(meanDeltaY = mean(deltaY))
+
+subjects = unique(delta$subject)
+
+bs = numeric()
+for (s in subjects) {
+  x = delta[delta$subject==s,]
+  fit = nlsLM(sideLen ~ a*meanDeltaY^b, data=x, start=list(a=1, b=1))
+  bs <- c(bs, coef(fit)['b'])
+}
+
+mean(bs)
+sd(bs)
+(1-mean(bs))/sd(bs)
+t.test(bs, mu=1)
 ```
 
 Non-linear regression: side length ~ std y-axis estimates
-```{r eval=FALSE}
+```{r}
 sigma = data %>%
   group_by(subject, sideLen) %>%
   summarize(estYstd = sd(estY))
@@ -201,11 +245,6 @@ sd(bs)
 (1-mean(bs))/sd(bs)
 t.test(bs, mu=1)
 ```
-
-deltas = data %>%
-  group_by(SubjectID, L) %>%
-  summarize(EstYstd = sd(EstYAdjusted))
-
 
 Plot 1
 ```{r}
