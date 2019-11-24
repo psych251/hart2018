@@ -78,7 +78,7 @@ library(tidyverse)
 library(minpack.lm)
 
 # data pre-processed using Python ()
-data = read.csv('~/github/hart2018/data/original_exp2data.csv')
+data = read.csv('../data/original_exp2data.csv')
 
 data = data %>%
   group_by(SubjectID, L) %>%
@@ -106,13 +106,15 @@ to achieve 95% power, we need N = 23.
 
 ### Planned Sample
 
-The full task takes about 9 minutes (7 minutes when I tried + allowing buffer time for consent process and/or slower responses) to complete. Therefore, in order to be consistent with California minimum wage ($7.25/hour), each participant should get paid $1.09. We will recruit N = 30 participants.
+The full task takes about 10 minutes (7 minutes when I tried + allowing buffer time for consent process and/or slower responses) to complete. Therefore, in order to be consistent with California minimum wage ($7.25/hour), each participant should get paid $1.21. To allow for a buffer for additional exlusion, we will recruit N = 40 participants.
 
 ### Differences from Original Study
 
-**Sample**: Both this replication project and the original study recruit particpants from MTurk, but the specific sample will differ. This should not affect the results.
+**Sample**: 
+Both this replication project and the original study recruit particpants from MTurk, but the specific sample will differ. This should not affect the results.
 
-**Materials and procedure**: Some details of the experimental design might need to be extrapolated, although I am actively contacting the original author for support/clarification. Specifically,
+**Materials and procedure**: 
+Some details of the experimental design might need to be extrapolated, although I am actively contacting the original author for support/clarification. Specifically,
 
 1. The criteria for the targeted participant pool (i.e. educated US adults), for example, having finished high school or college.  
 2. The displayed length of the line segments that form the base angles.
@@ -120,6 +122,12 @@ The full task takes about 9 minutes (7 minutes when I tried + allowing buffer ti
 4. The task parameters (i.e., base angle, base length) used in the practice trial.  
 
 These should not affect the results.
+
+**Exclusion**: 
+I will implement the following exclusion criteria:
+1. Participants who failed to complete all 150 trials will be excluded.
+2. Participants whose y-axis estimate fell below the triangle base (y=0) for more than 20% of the trials will be excluded.
+3. Participants whose x-axis estimate fell to the left of the x-coordinate of the left vertex or to the right of the x-coordinate of the right vertex for more than 20% of the trials will be excluded.
 
 **Analysis**: 
 1. A particular data analysis step from the paper will not be applicable: "To match the scales for the two groups, we divided the estimates of the second group by a ratio of 13/9."  
@@ -156,6 +164,78 @@ Sandbox test data:
 
 Original paper (Figure S4, mturk study, N=100):  
 ![Alt PaperFigureS4](../code/plot/comparison.png){width=80%}  
+
+### Main analysis
+
+```{r}
+library(tidyverse)
+library(minpack.lm)
+
+# data is preprocessed using iPython Jupyter Notebook
+data = read.csv('../data/batch3_postprocess.csv')
+
+# exclusion
+data  = data %>%
+  mutate(deltaY=scaledY-topY) %>%
+  filter(trial!='practice')
+  # ...TODO...
+```
+
+Non-linear regression: side length ~ std y-axis estimates
+```{r eval=FALSE}
+sigma = data %>%
+  group_by(subject, sideLen) %>%
+  summarize(estYstd = sd(estY))
+
+subjects = unique(sigma$subject)
+
+bs = numeric()
+for (s in subjects) {
+  x = sigma[sigma$subject==s,]
+  fit = nlsLM(sideLen ~ a*estYstd^b, data=x, start=list(a=1, b=1))
+  bs <- c(bs, coef(fit)['b'])
+}
+
+mean(bs)
+sd(bs)
+(1-mean(bs))/sd(bs)
+t.test(bs, mu=1)
+```
+
+deltas = data %>%
+  group_by(SubjectID, L) %>%
+  summarize(EstYstd = sd(EstYAdjusted))
+
+
+Plot 1
+```{r}
+plotdata1 = data %>%
+  group_by(subject, baseAngle, sideLen) %>%
+  summarize(meanDeltaY=mean(deltaY)) %>% # within subject mean y-axis deviation
+  group_by(baseAngle, sideLen) %>%
+  summarize(stdDeltaY=sd(meanDeltaY), meanDeltaY=mean(meanDeltaY)) # across subject mean and std y-axis deviation
+
+plotdata1$baseAngle = as.factor(plotdata1$baseAngle) # for coloring
+ggplot(plotdata1, aes(x=sideLen, y=meanDeltaY, color=baseAngle)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin=meanDeltaY-stdDeltaY/2, ymax=meanDeltaY+stdDeltaY/2)) + 
+  labs(x='L, triangle side length', y='δ, bias', color='Base Angle')
+```
+
+Plot 2
+```{r}
+plotdata2 = data %>%
+  group_by(subject, baseLen, sideLen) %>%
+  summarize(sigmaY=sd(scaledY)) %>% # within subject std y-axis estimates
+  group_by(baseLen, sideLen) %>%
+  summarize(stdSigmaY=sd(sigmaY), meanSigmaY=mean(sigmaY)) # across subject std y-axis estimates
+
+plotdata2$baseLen = as.factor(plotdata2$baseLen) # for coloring
+ggplot(plotdata2, aes(x=sideLen, y=meanSigmaY, color=baseLen)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin=meanSigmaY-stdSigmaY/2, ymax=meanSigmaY+stdSigmaY/2)) + 
+  labs(x='L, triangle side length', y='σ, std', color='Base Length')
+```
 
 
 ### Exploratory analyses
