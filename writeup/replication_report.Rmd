@@ -71,7 +71,7 @@ Additional data analysis steps from the paper that will be followed:
 
 ### Power Analysis
 
-I performed the analysis pipeline on the open-access data from the original paper to find out the standard deviation of the key analysis variable, σ, as well as to perform the planned t-test in the replication analysis pipeline. Although the mean scaling exponent from this reproduction attempt did not align with the original one (reproduced: 0.79, original: 0.65), the effect was in the correct direction and significant.
+I performed the analysis pipeline on the open-access data from the original paper to find out the standard deviation of the key analysis variable, σ, as well as to perform the planned t-test in the replication analysis pipeline. Although the mean scaling exponent from this reproduction attempt did not align with the original one (reproduced: 0.80, original: 0.65), the effect was in the correct direction and significant.
 
 ```{r}
 library(tidyverse)
@@ -89,7 +89,7 @@ subjects = unique(data$SubjectID)
 bs = numeric()
 for (s in subjects) {
   x = data[data$SubjectID==s,]
-  fit = nlsLM(L ~ a*EstYstd^b, data=x, start=list(a=1, b=1))
+  fit = nlsLM(EstYstd ~ a*L^b, data=x, start=list(a=1, b=1))
   bs <- c(bs, coef(fit)['b'])
 }
 
@@ -99,10 +99,10 @@ sd(bs)
 t.test(bs, mu=1)
 ```
 
-This analysis revealed that the effect size of the sublinearity of the scaling exponent is 0.79 (Cohen's d). Power analysis revealed that we need the following sample size to detect this effect size:
-to achieve 80% power, we need N = 15;
-to achieve 90% power, we need N = 19;
-to achieve 95% power, we need N = 23.
+This analysis revealed that the effect size of the sublinearity of the scaling exponent is 0.64 (Cohen's d). Power analysis revealed that we need the following sample size to detect this effect size:  
+to achieve 80% power, we need N = 22;  
+to achieve 90% power, we need N = 29;  
+to achieve 95% power, we need N = 35.
 
 ### Planned Sample
 
@@ -124,25 +124,22 @@ Some details of the experimental design might need to be extrapolated, although 
 These should not affect the results.
 
 **Exclusion**: 
-I will implement the following exclusion criteria:
-1. Participants who failed to complete all 150 trials will be excluded.
-2. Participants whose y-axis estimate fell below the triangle base (y=0) for more than 20% of the trials will be excluded.
+I will implement the following exclusion criteria:  
+1. Participants who failed to complete all 150 trials will be excluded.  
+2. Participants whose y-axis estimate fell below the triangle base (y=0) for more than 20% of the trials will be excluded.  
 3. Participants whose x-axis estimate fell to the left of the x-coordinate of the left vertex or to the right of the x-coordinate of the right vertex for more than 20% of the trials will be excluded.
 
-**Analysis**: 
+**Analysis**:  
 1. A particular data analysis step from the paper will not be applicable: "To match the scales for the two groups, we divided the estimates of the second group by a ratio of 13/9."  
-2. The original paper performed regression using some function in Mathematica 11.0, while I plan to use nls() in R. This should not affect the results.
+2. The original paper performed regression using some function in Mathematica 11.0, while I plan to use nlsLM() in R. This should not affect the results.
 
 ### Methods Addendum (Post Data Collection)
 
-You can comment this section out prior to final report with data collection.
-
 #### Actual Sample
-  Sample size, demographics, data exclusions based on rules spelled out in analysis plan
+  Our actual sample size is N=40, with 20 in Group 1 and 20 in Group 2. After applying the exclusion criteria, a total of 3 subjects were excluded from all subsequent analyses: 2 subjects were excluded from Group 1 and 1 subject was excluded from Group 2.
 
 #### Differences from pre-data collection methods plan
-  Any differences from what was described as the original plan, or “none”.
-
+  I fixed some bugs from the previous implementation of the analysis steps, but no difference from pre-data collection methods plan was added.
 
 ## Results
 
@@ -152,21 +149,11 @@ You can comment this section out prior to final report with data collection.
 Data preparation is performed using python in a Jupyter notebook.  
 Code can be found in the project git repo: https://github.com/psych251/hart2018/tree/master/code/preprocess.ipynb
 
-### Confirmatory analysis
-
-In a sandbox mock run with 30 trials, I intentionally clicked on the left vertex for each trial. The plot below shows that the "estimated" left vertex locations is nicely aligned with the true left vertex locations (x-axis jittered).  
-![Alt SanityCheck1](../code/plot/sanity_check.png){width=65%}
-
-I completed a second sandbox mock run with the full 150 trials. The plot below shows the comparison of the main two analyses between this test data and the original paper's.
-
-Sandbox test data:  
-![Alt SanityCheck2](../code/plot/sanity_check2.png){width=80%}  
-
-Original paper (Figure S4, mturk study, N=100):  
-![Alt PaperFigureS4](../code/plot/comparison.png){width=80%}  
-
 ### Main analysis
 
+Note that following the original paper, the error bars in the plots indicate the standard deviation of the measures across subjects.
+
+Load data and exclude subjects:
 ```{r}
 library(tidyverse)
 library(minpack.lm)
@@ -177,7 +164,7 @@ library(minpack.lm)
 #   organizing into tidy form
 #   add triangle parameters for each trial
 # Link: https://github.com/psych251/hart2018/tree/master/code/preprocess.ipynb
-data = read.csv('../data/pilotb_postprocess.csv')
+data = read.csv('../data/final_postprocess_corrected.csv')
 data  = data %>%
   mutate(deltaY=scaledY-topY) %>% # create a column for y-axis estimate deviation
   filter(trial!='practice') # exclude practice trials
@@ -201,49 +188,52 @@ exclude = numeric()
 for (s in subjects) {
   if (exclude_subject(s)) {exclude=c(exclude, s)}
 }
+
 data = data %>% filter(! subject %in% exclude)
 ```
 
-Non-linear regression: side length ~ y-axis deviation (throws an error, needs to be fixed)
-```{r eval=FALSE}
+Non-linear regression: δ ~ a1 * L<sup>b1</sup>
+```{r}
 delta = data %>%
   group_by(subject, sideLen) %>%
   summarize(meanDeltaY = mean(deltaY))
 
 subjects = unique(delta$subject)
 
-bs = numeric()
+as = numeric()
+b1 = numeric()
 for (s in subjects) {
   x = delta[delta$subject==s,]
-  fit = nlsLM(sideLen ~ a*meanDeltaY^b, data=x, start=list(a=1, b=1))
-  bs <- c(bs, coef(fit)['b'])
+  fit = nlsLM(meanDeltaY ~ a*(sideLen)^b, data=x, start=list(a=1, b=1))
+  as <- c(as, coef(fit)['a'])
+  b1 <- c(b1, coef(fit)['b'])
 }
 
-mean(bs)
-sd(bs)
-(1-mean(bs))/sd(bs)
-t.test(bs, mu=1)
+mean(as)
+mean(b1)
+t.test(b1, mu=1)
 ```
 
-Non-linear regression: side length ~ std y-axis estimates
+Non-linear regression: σ ~ a2 * L<sup>b2</sup>
 ```{r}
 sigma = data %>%
   group_by(subject, sideLen) %>%
-  summarize(estYstd = sd(estY))
+  summarize(estYstd = sd(scaledY))
 
 subjects = unique(sigma$subject)
 
-bs = numeric()
+as = numeric()
+b2 = numeric()
 for (s in subjects) {
   x = sigma[sigma$subject==s,]
-  fit = nlsLM(sideLen ~ a*estYstd^b, data=x, start=list(a=1, b=1))
-  bs <- c(bs, coef(fit)['b'])
+  fit = nlsLM(estYstd ~ a*sideLen^b, data=x, start=list(a=1, b=1))
+  as<- c(as, coef(fit)['a'])
+  b2 <- c(b2, coef(fit)['b'])
 }
 
-mean(bs)
-sd(bs)
-(1-mean(bs))/sd(bs)
-t.test(bs, mu=1)
+mean(as)
+mean(b2)
+t.test(b2, mu=1)
 ```
 
 Plot 1
@@ -267,7 +257,7 @@ plotdata2 = data %>%
   group_by(subject, baseLen, sideLen) %>%
   summarize(sigmaY=sd(scaledY)) %>% # within subject std y-axis estimates
   group_by(baseLen, sideLen) %>%
-  summarize(stdSigmaY=sd(sigmaY), meanSigmaY=mean(sigmaY)) # across subject std y-axis estimates
+  summarize(stdSigmaY=sd(sigmaY), meanSigmaY=mean(sigmaY)) # across subject std y-axis estsimates
 
 plotdata2$baseLen = as.factor(plotdata2$baseLen) # for coloring
 ggplot(plotdata2, aes(x=sideLen, y=meanSigmaY, color=baseLen)) + 
@@ -276,6 +266,10 @@ ggplot(plotdata2, aes(x=sideLen, y=meanSigmaY, color=baseLen)) +
   labs(x='L, triangle side length', y='σ, std', color='Base Length')
 ```
 
+
+Original paper (Figure S4, mturk study, N=100):  
+Note that the delta and sigma (y-axes values) in the original paper's analyses were calculated using pixel-space y-estimates, whereas this replication calculated these values in the scaled-space.   
+![Alt PaperFigureS4](../code/plot/comparison.png){width=80%}  
 
 ### Exploratory analyses
 
