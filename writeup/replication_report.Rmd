@@ -15,12 +15,14 @@ output:
 ## Introduction
 
 ### Choice of experiment
-Hart et al. (2018) used a simple planar geometric task to examine why people's intuitive geometric reasoning deviated from deterministic, rule-based Euclidean representations and provided a computational account for such deviation. This is particularly relevant to my own work in which I seek to model the acquisition of geometric intuitions.
+Hart et al. (2018) used a simple planar geometric task to examine why people's intuitive geometric reasoning deviated from deterministic, rule-based Euclidean representations and provided a computational account for such deviation. This is particularly relevant to my own work in which I seek to model the acquisition of geometric intuitions and mathematical reasoning.
 
 ### Description of paper
-Across 5 variations of the Triangle Completion Task, Hart et al. (2018) found that the distribution of participants' error in estimating the missing corner of a fragmented triangle was scale-dependent, contrary to a static Euclidean representation. The study then showed that the statistical characteristics of a correlated random walk model captured the simulation-based strategies that might have guided the geometric reasoning process in the Triangle Completion Task.
+Across 5 variations of the Triangle Completion Task, Hart et al. (2018) found that the distribution of participants' error in estimating the missing top corner of a fragmented triangle was scale-dependent, contrary to a static Euclidean representation. The study then showed that the statistical characteristics of a correlated random walk model captured the simulation-based strategies that might have guided the geometric reasoning process in the Triangle Completion Task.
 
-I aim to replicate the main behavioral findings of Experiment 2 of Hart et al. (2018) (Figure S4 A, B), where the study showed that 1). the error of the vertical mean estimate of the missing vertex of the triangle was biased toward the base and increased linearly with side length, and 2). the y-coordinate standard deviation scaled sub-linearly with the side length.
+I aim to replicate the main behavioral findings of Experiment 2 of Hart et al. (2018) (Figure S4 A, B), which showed:  
+1. the error of the vertical mean estimate of the missing vertex of the triangle was biased toward the base and increased linearly with side length.  
+2. the y-coordinate standard deviation scaled sub-linearly with the side length.
 
 ### Stimuli and procedures
 Participants were recruited via Amazon’s Mechanical Turk. Participants were shown 15 different incomplete isosceles triangles, each for 10 times, in a random order. Participants were assigned randomly into two equal-sized groups. Triangles composed of 3 different base angle sizes (Group 1: 30, 45 and 60 degrees; Group 2: 36, 51, and 66 degrees) and with 5 different base lengths (0.1, 0.25, 0.5, 0.75 and 1). For each triangle, participants were asked to position a dot in the estimated location of the missing vertex. A practice trial preceded the experiment.
@@ -41,18 +43,20 @@ Experiment Implementation: http://web.stanford.edu/~liyuxuan/mturk/experiment.ht
 ### Materials
 Materials as quoted from the original paper:
 
-"All participants were shown 15 (fragmented isosceles) triangles, at base lengths of 0.1, 0.25, 0.5, 0.75, 1 of the maximum base length (which was 900 pixels for group 1 and 1300 pixels for group 2). Each base length presented 3 different angle sizes (30, 45 and 60 degrees for group 1 and 36, 51 and 66 degrees for group 2)...group 1 saw a y-coordinate length scale of 900 pixels and group 2 saw a y-coordinate length scale of 1300 pixels."
+> All participants were shown 15 (fragmented isosceles) triangles, at base lengths of 0.1, 0.25, 0.5, 0.75, 1 of the maximum base length (which was 900 pixels for group 1 and 1300 pixels for group 2). Each base length presented 3 different angle sizes (30, 45 and 60 degrees for group 1 and 36, 51 and 66 degrees for group 2)...group 1 saw a y-coordinate length scale of 900 pixels and group 2 saw a y-coordinate length scale of 1300 pixels.
 
-The stimuli used in this replication project will follow the materials quoted above, except the images will be 2175px by 1425px, and both groups will see the same y-coordinate length.
+The stimuli used in this replication project will follow the materials quoted above, except the images will be 2175px by 1425px, and both groups will see the same y-coordinate length. In addition, the html image container is sized 435px by 285px  
+The stimuli images are generated using code in this ipython Jupyter notebook: https://github.com/psych251/hart2018/tree/master/code/generate_image.ipynb.  
+The images used in this replication project can also be found in the git repo: https://github.com/psych251/hart2018/tree/master/images.
 
 ### Procedure	
 The task procedure used in this replication project will precisely follow the description in the original paper:
 
-"... we showed participants 15 different incomplete isosceles triangles 10 times in a random order (for a total of 150 triangles for each participant)...For each triangle, we asked participants to position a dot in the estimated location of the missing vertex. Before the experiment began, participants had one practice trial, in which the location of the missing vertex was indicated by a dot of a different color, and they were asked to position their dot on the indicated position."
+> ... we showed participants 15 different incomplete isosceles triangles 10 times in a random order (for a total of 150 triangles for each participant)...For each triangle, we asked participants to position a dot in the estimated location of the missing vertex. Before the experiment began, participants had one practice trial, in which the location of the missing vertex was indicated by a dot of a different color, and they were asked to position their dot on the indicated position.
 
 ### Analysis Plan
 
-I plan to use python for data-cleaning, pre-processing, and plotting, and use the nls() function in R to perform nonlinear regression.
+I plan to use python for data-cleaning and pre-processing, and use the nlsLM() function in R to perform nonlinear regression.
 
 **Main variables of interest**  
 δ, the mean estimated y-coordinate deviation from the true y-coordinate location of the missing vertex  
@@ -64,14 +68,13 @@ L, triangle side length
 2. δ ~ L<sup>x1</sup>, δ increases linearly with L (x1 close to 1)  
 3. σ ~ L<sup>x2</sup>, σ scales sub-linearly with L (x2 < 1)  
 
-In addition, I will use a one-sample t-test to as the statistical test for the sublinearity of the scaling exponent.
+In addition, I will use an one-sample t-test to as the statistical test for the sublinearity of the scaling exponent.
 
-Additional data analysis steps from the paper that will be followed:
-"The mean deviation from the true location of the missing vertex... and the standard deviation were calculated for each participant and then averaged across participants."
+Additional data analysis steps from the paper that will be followed: "The mean deviation from the true location of the missing vertex... and the standard deviation were calculated for each participant and then averaged across participants."
 
 ### Power Analysis
 
-I performed the analysis pipeline on the open-access data from the original paper to find out the standard deviation of the key analysis variable, σ, as well as to perform the planned t-test in the replication analysis pipeline. Although the mean scaling exponent from this reproduction attempt did not align with the original one (reproduced: 0.80, original: 0.65), the effect was in the correct direction and significant.
+I performed the analysis pipeline on the open-access data from the original paper to find out the standard deviation of the key analysis variable, σ, as well as to perform the planned t-test in the replication analysis pipeline. Although the mean scaling exponent from this reproduction attempt did not align with the original one (reproduced: 0.80, original: 0.64), the effect was in the correct direction and significant.
 
 ```{r}
 library(tidyverse)
@@ -99,7 +102,7 @@ sd(bs)
 t.test(bs, mu=1)
 ```
 
-This analysis revealed that the effect size of the sublinearity of the scaling exponent is 0.64 (Cohen's d). Power analysis revealed that we need the following sample size to detect this effect size:  
+This analysis revealed that the effect size of the sublinearity of the scaling exponent is 0.64 (Cohen's d). Power analysis (using G*Power) revealed that we need the following sample size to detect this effect size:  
 to achieve 80% power, we need N = 22;  
 to achieve 90% power, we need N = 29;  
 to achieve 95% power, we need N = 35.
@@ -121,6 +124,12 @@ Some details of the experimental design might need to be extrapolated, although 
 3. The size of the dot to be moved, relative to the triangles.
 4. The task parameters (i.e., base angle, base length) used in the practice trial.  
 
+In this replication project, I implemented the following for each of the above:  
+1. Mturk participants are filtered by 92% HIT approval rate, completed more than 5000 HITs, located in the US.  
+2. The displayed length of the line segments is 0.04. This is chosen so that the smallest triangle appears as incomplete.  
+3. The size of the dot to be moved is 10px by 10px.  
+4. The practice trial triangle had a base length of 0.66, and base angle of 56 degrees.
+
 These should not affect the results.
 
 **Exclusion**: 
@@ -139,7 +148,7 @@ I will implement the following exclusion criteria:
   Our actual sample size is N=40, with 20 in Group 1 and 20 in Group 2. After applying the exclusion criteria, a total of 3 subjects were excluded from all subsequent analyses: 2 subjects were excluded from Group 1 and 1 subject was excluded from Group 2.
 
 #### Differences from pre-data collection methods plan
-  I fixed some bugs from the previous implementation of the analysis steps, but no difference from pre-data collection methods plan was added.
+  I fixed some bugs from the previous implementation (pilot-b stage) of the analysis steps, but no difference from pre-data collection methods plan was introduced.
 
 ## Results
 
@@ -149,7 +158,7 @@ I will implement the following exclusion criteria:
 Data preparation is performed using python in a Jupyter notebook.  
 Code can be found in the project git repo: https://github.com/psych251/hart2018/tree/master/code/preprocess.ipynb
 
-### Main analysis
+### Main confirmatory analysis
 
 Note that following the original paper, the error bars in the plots indicate the standard deviation of the measures across subjects.
 
@@ -236,7 +245,7 @@ mean(b2)
 t.test(b2, mu=1)
 ```
 
-Plot 1
+Plot 1: Mean error of y-coordinate estimation (δ) as a function of triangle side length
 ```{r}
 plotdata1 = data %>%
   group_by(subject, baseAngle, sideLen) %>%
@@ -251,7 +260,7 @@ ggplot(plotdata1, aes(x=sideLen, y=meanDeltaY, color=baseAngle)) +
   labs(x='L, triangle side length', y='δ, bias', color='Base Angle')
 ```
 
-Plot 2
+Plot 2: Mean standard deviation of y-coordinate estimation (σ) as a function of triangle side length
 ```{r}
 plotdata2 = data %>%
   group_by(subject, baseLen, sideLen) %>%
@@ -271,16 +280,13 @@ Original paper (Figure S4, mturk study, N=100):
 Note that the delta and sigma (y-axes values) in the original paper's analyses were calculated using pixel-space y-estimates, whereas this replication calculated these values in the scaled-space.   
 ![Alt PaperFigureS4](../code/plot/comparison.png){width=80%}  
 
-### Exploratory analyses
-
-Any follow-up analyses desired (not required).  
 
 ## Discussion
 
 ### Summary of Replication Attempt
 
-Open the discussion section with a paragraph summarizing the primary result from the confirmatory analysis and the assessment of whether it replicated, partially replicated, or failed to replicate the original result.  
+This replication was a partial success. The first key analysis did not replicate. In the replication data, δ scaled superlinearly w.r.t. L (*M*=2.79, *SD*=1.68, *t*(36)=6.4629, *p*<0.001). The second key analysis replicated, supporting the sublinearity scaling between σ and L (*M*=0.57, *SD*=0.40, *t*(36)=-6.4501, *p*<0.001).
 
 ### Commentary
 
-Add open-ended commentary (if any) reflecting (a) insights from follow-up exploratory analysis, (b) assessment of the meaning of the replication (or not) - e.g., for a failure to replicate, are the differences between original and present study ones that definitely, plausibly, or are unlikely to have been moderators of the result, and (c) discussion of any objections or challenges raised by the current and original authors about the replication attempt.  None of these need to be long.
+It was a short time frame to generate the stimuli, code up the paradigm and the analysis, run pilot experiments and perform final data collection, but this opportunity to replicate a full experiment was truly a rewarding experience. A challenge that I had not anticipated was the intricacy of generating the task images so that the triangle bases and corners sit exactly at the border pixel rows of the image. This way, we can ensure that the click responses computed w.r.t. the HTML image container match with the coordinate system used to generate the triangle images. In addition, it took some thought to design the experiment so that it won't be a pain for the participants to perform the task. For example, rather than having the partcipants manually click on the small dot and drag it, I implemented it in a way that the dot will move with the cursor, and a click functions to drop the dot. Although part of the original results did not replicate, the takeaway is the same: people are pretty bad at standard geometric form reasoning, and they do not appear to stick to Euclidean rules when deploying geometric intuitions.
