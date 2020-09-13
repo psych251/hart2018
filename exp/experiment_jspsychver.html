@@ -25,8 +25,7 @@
     var test_images_dict = [];
     for (var i=0; i < num_images; i++) {
         test_images.push("images/group"+group+"_"+i+".png");
-        test_images_dict.push({trial_type: 'test',
-                               image: "images/group"+group+"_"+i+".png"})
+        test_images_dict.push({image: "images/group"+group+"_"+i+".png"})
     }
 
     var instructions = {
@@ -58,14 +57,14 @@
 
     var trial = {
         type: 'triangle',
-        trial_type: jsPsych.timelineVariable('trial_type'),
+        prac: jsPsych.timelineVariable('prac'),
         image: jsPsych.timelineVariable('image')
     }
 
     var prac_trial = {
         timeline: [trial],
         timeline_variables: [
-            {trial_type: 'prac', image: prac_image}
+            {prac: true, image: prac_image}
         ]
     }
 
@@ -73,7 +72,7 @@
         timeline: [trial],
         timeline_variables: test_images_dict,
         randomize_order: true,
-        repetitions: 10
+        repetitions: 1
     }
 
     // data/server communication
@@ -106,7 +105,7 @@
                 var timestamp = Date.now();
                 var uid = worker_id + timestamp;
                 save_data('triangle/uid.json', uid+'\n');
-         		save_data('triangle/' + worker_id+'_'+timestamp + ".csv", jsPsych.data.dataAsCSV());
+         		save_data('triangle/' + worker_id+'_'+timestamp + ".csv", jsPsych.data.get().csv());
          		var final_msg = "Thank you for completing this HIT! <br /><br /> \
                     Your responses are being saved. Please close this page after \
                     you copy the code below and submit the HIT. <br /><br /> \

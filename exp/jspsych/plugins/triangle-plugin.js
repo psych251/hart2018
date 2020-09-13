@@ -6,9 +6,9 @@ jsPsych.plugins["triangle"] = (function() {
   plugin.info = {
     name: "triangle",
     parameters: {
-        trial_type: {
-          type: jsPsych.plugins.parameterType.STRING,
-          default: undefined,
+        prac: {
+          type: jsPsych.plugins.parameterType.BOOL,
+          default: false,
         },
         image: {
           type: jsPsych.plugins.parameterType.STRING,
@@ -25,9 +25,9 @@ jsPsych.plugins["triangle"] = (function() {
       var html = '<div id="trial" class="trialDiv">'
 
       // trial instruction
-      if (trial.trial_type == 'prac') {
+      if (trial.prac) {
           html += '<p> Move dot to the top corner location (marked in light blue). </p>';
-      } else if (trial.trial_type == 'test') {
+      } else {
           html += '<p> Move dot to the top corner location. </p>';
       }
 
@@ -95,7 +95,7 @@ jsPsych.plugins["triangle"] = (function() {
 
           // data saving
           var trial_data = {
-              trial_type: trial.trial_type,
+              is_prac: trial.prac,
               image: trial.image,
               click_x: click_x,
               click_y: click_y,
