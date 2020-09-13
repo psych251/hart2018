@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+
+<head>
+<title>Triangle Experiment</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="jspsych/jspsych.js"></script>
+<script src="jspsych/plugins/jspsych-instructions.js"></script>
+<script src="jspsych/plugins/triangle-plugin.js"></script>
+<link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+<link href="jspsych/css/triangle.css" rel="stylesheet" type="text/css"></link>
+</head>
+
+<body>
+</body>
+
+<script>
+
+    var group = Math.random() < 0.5? 1:2;
+
+    // images
+    var prac_image = 'images/practice.png';
+    var num_images = 15;
+    var test_images = [];
+    var test_images_dict = [];
+    for (var i=0; i < num_images; i++) {
+        test_images.push("images/group"+group+"_"+i+".png");
+        test_images_dict.push({trial_type: 'test',
+                               image: "images/group"+group+"_"+i+".png"})
+    }
+
+    var instructions = {
+        type: 'instructions',
+        show_clickable_nav: true,
+        pages: [
+            "By answering the following questions, you are participating in a \
+            study being performed by cognitive scientists in the Stanford \
+            Department of Psychology. If you have questions about this \
+            research, please contact us at <a href=\"mailto:stanfordpsych251@gmail.com\"> \
+            stanfordpsych251@gmail.com</a>. You must be at least 18 years \
+            old to participate. Your participation in this research is \
+            voluntary. You may decline to answer any or all of the \
+            following questions. You may decline further participation, \
+            at any time, without adverse consequences. Your anonymity is \
+            assured; the researchers who have requested your participation \
+            will not receive any personal information about you. We have \
+            recently been made aware that your public Amazon.com profile \
+            can be accessed via your worker ID if you do not choose to opt \
+            out. If you would like to opt out of this feature, you may \
+            follow instructions available <a href=\"http://www.amazon.com/gp/help/customer/display.html?nodeId=16465241\">here</a>.",
+            "For each incomplete triangle, click to position the dot to \
+            the missing top corner location. <br /><br /> \
+            Use ctrl+ or ctrl- to resize the browser so that you \
+            see both the instruction and the bottom of the triangles.  <br /><br /> \
+            This HIT takes less than 10 minutes. Please complete in one sitting."
+        ]
+    }
+
+    var trial = {
+        type: 'triangle',
+        trial_type: jsPsych.timelineVariable('trial_type'),
+        image: jsPsych.timelineVariable('image')
+    }
+
+    var prac_trial = {
+        timeline: [trial],
+        timeline_variables: [
+            {trial_type: 'prac', image: prac_image}
+        ]
+    }
+
+    var test_trials = {
+        timeline: [trial],
+        timeline_variables: test_images_dict,
+        randomize_order: true,
+        repetitions: 10
+    }
+
+    // data/server communication
+    function save_data(filename, filedata){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://web.stanford.edu/~liyuxuan/cgi-bin/save_data.php');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({filename: filename, filedata: filedata}));
+    }
+
+    var start_exp = function() {
+
+        $(window).bind('beforeunload', function(){
+            return 'Are you sure you want to leave? Your data may not be recorded.';
+        });
+
+        var turk_info = jsPsych.turk.turkInfo();
+        var worker_id = turk_info.workerId;
+
+        jsPsych.data.addProperties({
+            subject: worker_id,
+            group: group
+        });
+
+        jsPsych.init({
+            preload_images: test_images.concat([prac_image]),
+            timeline: [instructions, prac_trial, test_trials],
+            on_finish: function() {
+                // create and save unique ID
+                var timestamp = Date.now();
+                var uid = worker_id + timestamp;
+                save_data('triangle/uid.json', uid+'\n');
+         		save_data('triangle/' + worker_id+'_'+timestamp + ".csv", jsPsych.data.dataAsCSV());
+         		var final_msg = "Thank you for completing this HIT! <br /><br /> \
+                    Your responses are being saved. Please close this page after \
+                    you copy the code below and submit the HIT. <br /><br /> \
+                    Your completion code is: " + uid + '. Please return to the \
+                    mturk HIT page to paste this code and submit the HIT. Your \
+                    completion payment and bonus payment will be processed \
+                    within the next 15 hours.';
+                document.getElementsByTagName('body')[0].innerHTML = final_msg;
+            }
+        })
+    }
+
+    start_exp();
+
+</script>
+</html>
